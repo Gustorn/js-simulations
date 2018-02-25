@@ -1,23 +1,36 @@
+import { bind } from "hovl/bind";
 import { Scene } from "hovl/scene";
 import { Circle } from "hovl/shapes";
+import { Vector } from "hovl/vector";
+
+class CircleSimulation {
+  public first = Vector(2, 2);
+  public second = Vector(8, 8);
+
+  public update(time: number): void {
+    this.first.x = 5 + Math.sin(time) * 3;
+    this.second.y = 5 + Math.sin(time) * 3;
+  }
+}
 
 class CirclesScene extends Scene {
+  private simulation = new CircleSimulation();
+
   public constructor(canvas: HTMLCanvasElement) {
     super(canvas);
 
     this.shapes = [
       new Circle(1, "#00FF00", {
-        translate: { x: 2, y: 2 }
+        translate: bind(this.simulation, "first")
       }),
       new Circle(1, "#0000FF", {
-        translate: { x: 8, y: 8 }
+        translate: bind(this.simulation, "second")
       })
     ];
   }
 
   protected update(time: number): void {
-    this.shapes[0].translate.x = 5 + Math.sin(time) * 3;
-    this.shapes[1].translate.y = 5 + Math.sin(time) * 3;
+    this.simulation.update(time);
   }
 }
 

@@ -1,17 +1,18 @@
+import { BindableProperty, getValue } from "hovl/bind";
 import { Vector } from "hovl/vector";
 
 export interface Trs {
-  translate: Vector;
-  rotate: number;
-  scale: Vector | number;
+  translate: BindableProperty<Vector>;
+  rotate: BindableProperty<number>;
+  scale: BindableProperty<Vector>;
 }
 
 export abstract class Shape {
   public color: string;
 
-  public translate: Vector;
-  public rotate: number;
-  public scale: Vector;
+  public translate: BindableProperty<Readonly<Vector>>;
+  public rotate: BindableProperty<number>;
+  public scale: BindableProperty<Readonly<Vector>>;
 
   constructor(
     color: string,
@@ -19,16 +20,20 @@ export abstract class Shape {
   ) {
     this.color = color;
 
-    this.translate = Vector(translate);
+    this.translate = translate;
     this.rotate = rotate;
-    this.scale = Vector(scale);
+    this.scale = scale;
   }
 
   public draw(context: CanvasRenderingContext2D): void {
+    const translate = getValue(this.translate);
+    const rotate = getValue(this.rotate);
+    const scale = getValue(this.scale);
+
     context.save();
-    context.translate(this.translate.x, this.translate.y);
-    context.rotate(this.rotate);
-    context.scale(this.scale.x, this.scale.y);
+    context.translate(translate.x, translate.y);
+    context.rotate(rotate);
+    context.scale(scale.x, scale.y);
     this.drawInternal(context);
     context.restore();
   }
@@ -37,16 +42,20 @@ export abstract class Shape {
 }
 
 export class Circle extends Shape {
-  public radius: number;
+  public radius: BindableProperty<number>;
 
-  constructor(radius: number, color: string, trs: Partial<Trs>) {
+  constructor(
+    radius: BindableProperty<number>,
+    color: string,
+    trs: Partial<Trs>
+  ) {
     super(color, trs);
     this.radius = radius;
   }
 
   protected drawInternal(context: CanvasRenderingContext2D): void {
     context.beginPath();
-    context.arc(0, 0, this.radius, 0, Math.PI * 2);
+    context.arc(0, 0, getValue(this.radius), 0, Math.PI * 2);
     context.fillStyle = this.color;
     context.fill();
   }
